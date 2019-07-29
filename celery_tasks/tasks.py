@@ -3,8 +3,14 @@ from celery import Celery
 from django.core.mail import send_mail
 from django.conf import settings
 
+# 在任务处理者加下面 4 句
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dailyfresh.settings')
+django.setup()
+
 # 创建 celery 的实例对象
-app = Celery('celery_tasks.tasks', broker='redis://10.211.55.6:6379/8')  # 10.211.55.6:6379/8
+app = Celery('celery_tasks.tasks', broker='redis://127.0.0.1:6379/8')  # 10.211.55.6:6379/8
 
 
 # 定义人物函数

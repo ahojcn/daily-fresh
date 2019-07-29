@@ -114,7 +114,7 @@ class RegisterView(View):
         token = s.dumps(info)  # typeof token = bytes
         token = token.decode('utf8')
 
-        # 发邮件
+        # 发邮件，发出任务（celery 的任务发出者）
         send_register_active_email.delay(email, username, token)
         # htmlmsg = '<h1>欢迎，%s<h1><br>请点击下面的链接激活您的账户：<br>' \
         #           '<a href="http://127.0.0.1:8000/user/active/%s">http://127.0.0.1:8000/user/active/%s</a>' \
@@ -122,6 +122,7 @@ class RegisterView(View):
         # send_mail("标题", "", settings.EMAIL_FROM, recipient_list=[email], html_message=htmlmsg)
 
         # 返回应答，跳转到首页
+
         return redirect(reverse("goods:index"))
 
 
