@@ -6,6 +6,8 @@ from django.views.generic import View
 from itsdangerous import TimedJSONWebSignatureSerializer, SignatureExpired
 from django.conf import settings
 from django.http import HttpResponse
+# from django.core.mail import send_mail
+from celery_tasks.tasks import send_register_active_email
 
 
 # Create your views here.
@@ -57,6 +59,7 @@ from django.http import HttpResponse
 #         return redirect(reverse("goods:index"))
 
 # /user/register
+
 class RegisterView(View):
     """注册"""
 
@@ -79,7 +82,7 @@ class RegisterView(View):
             return render(request, 'register.html', {'errmsg': '数据不完整'})
 
         # 校验邮箱
-        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+        if not re.match(r'^[a-z0-9][\w.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
             return render(request, 'register.html', {'errmsg': '邮箱格式不正确'})
 
         # 是否同意用户协议
@@ -108,12 +111,15 @@ class RegisterView(View):
         # 加密用户的身份信息，生成激活的 token（口令）
         s = TimedJSONWebSignatureSerializer(settings.SECRET_KEY, 3600)
         info = {'confirm': user.id}
-        token = s.dumps(info)
-        # print(' token0 '.center(50, '#'))
-        # print(token)
-        # print(' token1 '.center(50, '#'))
-        pass
+        token = s.dumps(info)  # typeof token = bytes
+        token = token.decode('utf8')
+
         # 发邮件
+        send_register_active_email.delay(email, username, token)
+        # htmlmsg = '<h1>欢迎，%s<h1><br>请点击下面的链接激活您的账户：<br>' \
+        #           '<a href="http://127.0.0.1:8000/user/active/%s">http://127.0.0.1:8000/user/active/%s</a>' \
+        #           % (username, token, token)
+        # send_mail("标题", "", settings.EMAIL_FROM, recipient_list=[email], html_message=htmlmsg)
 
         # 返回应答，跳转到首页
         return redirect(reverse("goods:index"))
@@ -136,7 +142,6 @@ class ActiveView(View):
             user.is_active = 1
             user.save()
             # 返回应答，跳转到登录页面
-            # print(' 成功激活 '.center(50, '#'))
             return redirect(reverse('user:login'))
         except SignatureExpired as e:
             # 激活链接过期

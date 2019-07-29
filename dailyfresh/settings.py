@@ -135,3 +135,15 @@ TINYMCE_DEFAULT_CONFIG = {
     'width': 600,
     'height': 400,
 }
+
+# 发送邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# 发邮件的 smtp 服务器地址
+EMAIL_HOST = 'smtp.126.com'
+EMAIL_PORT = 25
+# 发送邮件的邮箱
+EMAIL_HOST_USER = 'ahojcn@126.com'
+# 在邮箱中设置的客户端授权密码
+EMAIL_HOST_PASSWORD = 'abcd123'
+# 收件人看到的发件人
+EMAIL_FROM = 'ahojcn<ahojcn@126.com>'
