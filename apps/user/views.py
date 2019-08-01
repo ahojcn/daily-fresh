@@ -104,7 +104,7 @@ class RegisterView(View):
             return render(request, 'register.html', {'errmsg': '用户已存在'})
 
         # 业务处理：用户注册
-        user = User.objects.create_user(username, email, password)
+        user = User.objects.create_user(username=username, email=email, password=password)
         user.is_active = 0  # 不激活
         user.save()
 
@@ -155,8 +155,7 @@ class ActiveView(View):
 class LoginView(View):
     """登录"""
 
-    @staticmethod
-    def get(request):
+    def get(self, request):
         """显示登录页面"""
         # 判断是否记住了用户名
         if 'username' not in request.COOKIES:
@@ -167,8 +166,7 @@ class LoginView(View):
             checked = ''
         return render(request, 'login.html', {'username': username, 'checked': checked})
 
-    @staticmethod
-    def post(request):
+    def post(self, request):
         """登录校验"""
         # 接收数据
         username = request.POST.get('username')
